@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/25 14:41:51 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 12:27:38 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/17 19:46:59 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,7 @@ void	ft_print_split(char **split)
 {
 	int	i;
 
-	i = 0;
-	while (split[i])
-	{
-		ft_putstr(split[i]);
-		// write(1, "\n", 4);
-		i++;
-	}
+	i = -1;
+	while (split[++i])
+		ft_putendl(split[i]);
 }

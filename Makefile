@@ -7,6 +7,7 @@ LIB		=	-lft
 
 SRC		=	src/main.c	\
 			src/redir.c	\
+			src/dev.c	\
 
 OBJ		=	$(SRC:%.c=%.o)
 

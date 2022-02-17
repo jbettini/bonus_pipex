@@ -6,57 +6,90 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/25 14:38:36 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 18:16:24 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/17 23:02:12 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <pipex.h>
-char	**get_paths(t_env *env)
-{
-	int	i;
+#include "pipex.h"
 
-	i = 0;
-	while (env->envp[i] && ft_strncmp(env->envp[i], "PATH=", 5))
-		i++;
-	return (ft_split(env->envp[i] + 5, ':'));
+char	*make_cmd_path(char **args, char **paths)
+{
+	int		i;
+	char	*cmd;
+	char	*cmd_path;
+
+	i = -1;
+	cmd_path = NULL;
+	cmd = ft_strjoin("/", args[0]);
+	while (paths[++i])
+	{
+		cmd_path = ft_strjoin(paths[i], cmd);
+		if (!access(cmd_path, F_OK | X_OK))
+		{
+			free(cmd);
+			return (cmd_path);
+		}
+		free(cmd_path);
+	}
+	free(cmd);
+	perror("command not found : ");
+	return (NULL);
 }
 
-void	redir(char **av, int ac)
+void	exec_in_child(char **args, t_env *env)
 {
-	int	infile;
-	int	outfile;
+	pid_t	pid;
 
-	
-	if (ft_strequ(av[1], "heredoc"))
+	env->cmd_path = make_cmd_path(args, env->paths);
+	if (!env->cmd_path)
+		return ;
+	pid = fork();
+	if (pid == -1)
+		exec_error(FORK_ERROR);
+	else if (!pid)
+		execve(env->cmd_path, args, env->envp);
+	else if (pid)
 	{
-		infile = fd_stdin(av[2], 0);
-		outfile = redir_to_stdout(av[ac - 1], 0);
+		waitpid(-1, NULL, 0);
+		if (env->cmd_path)
+			free(env->cmd_path);
 	}
-	else
+}
+
+void	exec(t_list *cmd, t_env *env)
+{
+	while (cmd)
 	{
-		infile = fd_stdin(av[1], 1);
-		outfile = redir_to_stdout(av[ac - 1], 1);
+		if (cmd->next)
+			pipex(cmd->content, env);
+		else
+		{
+			env->fd = redir_to_stdout(env->outfile, env->redir);
+			if (env->fd == -1)
+				exit(EXIT_FAILURE);
+			exec_in_child(cmd->content, env);
+		}
+		cmd = cmd->next;
 	}
-	if (dup2(infile, 0) == -1)
-		perror("dup error\n");
-	if (dup2(outfile, 1) == -1)
-		perror("dup error\n");
 }
 
 int	main(int ac, char **av, char **env)
 {	
-	t_env	*env_set;
+	t_env	env_set;
+	t_list	*cmd;
+	int		check;
 
-	env_set->envp = env;
-	env_set->paths = get_paths(env_set);
-	print()
-	// printf("1 - %s\n", get_next_line());
-	// if (ac >= 5)
-	// {
-		// redir(av, ac)
-
-	// }
-	redir(av, ac);
-	system("leaks pipex");
+	if (ac >= 5)
+	{
+		init_env(&env_set, env);
+		env_set.outfile = av[ac - 1];
+		cmd = init_cmd(&av[1], redir_in(av, ac, &env_set));
+		exec(cmd, &env_set);
+		ft_lstclear(&cmd, ft_free_lstdpt);
+		if (!access(".heredoc_tmp", F_OK))
+			unlink(".heredoc_tmp");
+	}
+	else
+		perror("Invalid arguments\n");
 	return (0);
 }

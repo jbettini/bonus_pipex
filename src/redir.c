@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 10:33:19 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 18:10:02 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/17 23:02:22 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,50 +16,65 @@ int redir_to_stdout(char *filename, int mod)
 {
     int fd;
 
-    if (mod)
+    if (!mod)
         fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0766);
-    else if (!mod)
+    else if (mod)
         fd = open(filename, O_CREAT | O_RDWR | O_APPEND, 0766);
     if (fd == -1)
-        return (OP_ERROR);
+        return (-1);
     if (dup2(fd, 1) == -1)
-        return (DUP_ERROR);
+        return (-1);
     return (fd);
 }
 
-// int ft(char **av, int nb_cmd, char **env)
-// {
-//     pid_t pid;
-//     int fd[2];
-//     int i;
+void	pipex(char **args, t_env *env)
+{
+	pid_t	pid;
+	int		fd[2];
 
-//     i = 0;
-//     while (i < nb_cmd)
-//     {
-//         if (pipe(fd) == -1)
-//         {
-//             perror("pipe");
-//             return (0);
-//         }
-//         pid = fork();
-//         if (pid == -1)
-//         {
-//             perror("fork");
-//             return (0);
-//         }
-//         if (pid == 0)
-//         {
-//             close(fd[0]);
-//             dup2(fd[1], 1);
-//             path = get_cmd_path(av[i], env);
-//             execve(path, )
-//             exit(1);
-//         }
-//         close(fd[1]);
-//         dup2(fd[0], 0);
-//         i++;        
-//     }
-// }
+	env->cmd_path = make_cmd_path(args, env->paths);
+	if (pipe(fd) == -1)
+		exec_error(PIPE_ERROR);
+	pid = fork();
+	if (pid == -1)
+		exec_error(FORK_ERROR);
+	if (!pid)
+	{
+		dup2(fd[1], 1);
+		close(fd[0]);
+		execve(env->cmd_path, args, env->envp);
+	}
+	else if (pid)
+	{
+		waitpid(-1, NULL, 0);
+		if (env->cmd_path)
+			free(env->cmd_path);
+		dup2(fd[0], 0);
+		close(fd[1]);
+	}
+}
+
+int	redir_in(char **av, int ac, t_env *env)
+{
+	int	infile;
+	int	i;
+
+	i = 0;
+	if (ft_strequ(av[1], "heredoc"))
+	{
+		infile = fd_stdin(av[2], 1);
+		i++;
+	}
+	else
+		infile = fd_stdin(av[1], 0);
+	if (infile != -1 && dup2(infile, 0) == -1)
+	{
+		perror("dup2 error ");
+		exit(EXIT_FAILURE);
+	}
+	env->redir = i;
+	return (i);
+}
 
 int fd_stdin(char *filename, int mod)
 {
@@ -70,12 +85,12 @@ int fd_stdin(char *filename, int mod)
     i = -1;
     hd = NULL;
     fd = 0;
-    if (mod)
+    if (!mod)
     {
         if (access(filename, F_OK | R_OK) == -1)
         {
             perror("file not found");
-            return (0);
+            return (-1);
         }
             return (open(filename, O_RDONLY));
     }
@@ -118,4 +133,3 @@ char **heredoc(char *stop)
     free(stop);
     return (ret);
 }
-// int redir_to_stdin

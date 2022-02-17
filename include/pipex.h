@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 00:31:00 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 18:08:58 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/17 23:05:37 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,12 @@
 
 typedef struct s_env
 {
-	char **paths;
-	char **envp;
+	char	**paths;
+	char	*cmd_path;
+	char	**envp;
+	int		redir;
+	char	*outfile;
+	int		fd;
 }				t_env;
 
 enum	e_err
@@ -32,9 +36,22 @@ enum	e_err
 	OP_ERROR,
 	DUP_ERROR,
 	OUT_ERROR,
-	CMD_ERROR
+	CMD_ERROR,
+	PATH_ERROR,
+	FORK_ERROR,
+	PIPE_ERROR
 };
 
+void	exec(t_list *cmd, t_env *env);
+void	exec_in_child(char **args, t_env *env);
+char	*make_cmd_path(char **args, char **paths);
+void	exec_error(int error);
+t_list	*init_cmd(char **av, int i);
+void	init_env(t_env *env_set, char **env);
+char	**get_paths(t_env *env);
+void	ft_free_lstdpt(void *content);
+int		redir_in(char **av, int ac, t_env *env);
+void	pipex(char **args, t_env *env);
 char    **heredoc(char *stop);
 int     redir_to_stdout(char *filename, int mod);
 int		fd_stdin(char *filename, int mod);
