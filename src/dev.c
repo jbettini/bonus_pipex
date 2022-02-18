@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/17 23:01:48 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 23:02:19 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/18 19:18:05 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ t_list	*init_cmd(char **av, int i)
 			ft_lstadd_back(&tmp, ft_lstnew(ft_split(av[i], ' ')));
 	else
 	{
-		i = 2;
+		i = 1;
 		while (av[++i + 1])
 			ft_lstadd_back(&tmp, ft_lstnew(ft_split(av[i], ' ')));
 	}
@@ -64,7 +64,11 @@ void	exec_error(int error)
 {
 	if (error == FORK_ERROR)
 		perror("fork failed :");
-	if (error == PIPE_ERROR)
+	else if (error == PIPE_ERROR)
 		perror("pipe failed :");
+	else if (error == OP_ERROR)
+		perror("open error : ");
+	else if (error == DUP_ERROR)
+		perror("dup error : ");
 	exit(1);
 }

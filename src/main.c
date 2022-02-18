@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/25 14:38:36 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/17 23:02:12 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/18 19:43:02 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,14 @@ int	main(int ac, char **av, char **env)
 	{
 		init_env(&env_set, env);
 		env_set.outfile = av[ac - 1];
-		cmd = init_cmd(&av[1], redir_in(av, ac, &env_set));
+		if (ft_strequ(av[1], "heredoc"))
+			check = fd_heredoc(av[2], &env_set);
+		else
+			check = fd_stdin(av[1], &env_set);
+		if (check == -1)
+			cmd = init_cmd(&av[1], 1);
+		else
+			cmd = init_cmd(&av[1], check);
 		exec(cmd, &env_set);
 		ft_lstclear(&cmd, ft_free_lstdpt);
 		if (!access(".heredoc_tmp", F_OK))
