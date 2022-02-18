@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 00:31:00 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/18 19:38:53 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/18 20:20:46 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,8 @@ char	**get_paths(t_env *env);
 void	ft_free_lstdpt(void *content);
 int		fd_heredoc(char *stop, t_env *env);
 void	pipex(char **args, t_env *env);
-char    **heredoc(char *stop);
-int     redir_to_stdout(char *filename, int mod);
+char	**heredoc(char *stop);
+int		redir_to_stdout(char *filename, int mod);
 int		fd_stdin(char *filename, t_env *env);
 
 #endif

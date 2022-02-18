@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/18 19:46:58 by jbettini          #+#    #+#             */
-/*   Updated: 2022/02/18 19:57:08 by jbettini         ###   ########.fr       */
+/*   Updated: 2022/02/18 20:08:44 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	redir_to_stdout(char *filename, int mod)
 
 	if (!mod)
 		fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0766);
-	else if (mod)
+	else
 		fd = open(filename, O_CREAT | O_RDWR | O_APPEND, 0766);
 	if (fd == -1)
 		return (-1);
